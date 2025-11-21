@@ -22,7 +22,17 @@ func GetTask(ctx *gin.Context) {
 	ctx.IndentedJSON(http.StatusOK, task)
 }
 
-func AddTask(ctx *gin.Context){}
+func AddTask(ctx *gin.Context) {
+	var newTask models.Task
+
+	if err := ctx.ShouldBindJSON(&newTask); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	tasks = append(tasks, newTask)
+
+	ctx.IndentedJSON(http.StatusCreated, newTask)
+}
 
 func UpdateTask(ctx *gin.Context) {
 	id := ctx.Param("id")
