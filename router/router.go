@@ -8,6 +8,7 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
+	
 	router := gin.Default()
 
 	router.GET("/ping", func(ctx *gin.Context){
@@ -19,7 +20,7 @@ func SetupRouter() *gin.Engine {
 	{
 		taskRoutes.GET("", controllers.GetTasks)
 		taskRoutes.GET("/:id", controllers.GetTask)
-		taskRoutes.POST("", controllers.AddTask)
+	 	taskRoutes.POST("", controllers.AddTask)
 		taskRoutes.PUT("/:id", controllers.UpdateTask)
 		taskRoutes.DELETE("/:id", controllers.DeleteTask)
 	}

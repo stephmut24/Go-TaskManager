@@ -2,21 +2,27 @@
 
 A simple RESTful API for managing tasks, built with Go and the Gin framework.
 
-This project provides basic CRUD (Create, Read, Update, Delete) operations for a task management system. It is intended as a simple demonstration of building a web service in Go.
+This project provides basic CRUD (Create, Read, Update, Delete) operations for a task management system. It now uses MongoDB as a persistent database, so tasks are stored permanently and will not be reset when the application restarts.
 
 **Note:** This API uses an in-memory data store. All tasks will be reset every time the application is restarted.
 
 ## Prerequisites
 
 - [Go](https://golang.org/dl/) (version 1.18 or newer)
+- [MongoDB](https://www.mongodb.com/try/download/community) 
 
 ## Getting Started
 
 1.  **Clone the repository** (or navigate to the existing project directory).
-
-2.  **Navigate to the API directory:**
     ```sh
+    git clone https://github.com/stephmut24/Go-TaskManager
     cd task_manager
+    ```
+
+2.  **Create a .env file**
+    ```sh
+    DB_URL=mongodb://localhost:27017
+    PORT=8080
     ```
 
 3.  **Install dependencies:**
@@ -49,7 +55,7 @@ The following endpoints are available:
 -   **Description:** Retrieves a single task by its ID.
 -   **Example `curl`:**
     ```sh
-    curl http://localhost:8080/tasks/1
+    curl http://localhost:8080/tasks/<task_id>
     ```
 
 ### Add a New Task
