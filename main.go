@@ -10,9 +10,10 @@ func main() {
 
 	config.LoadEnv()
 	config.ConnectDB()
-	data.InitTaskCollection() 
-	
-	
+	// initialize data collections after DB connection
+	data.InitUserCollection()
+	data.InitTaskCollection()
+
 	r := router.SetupRouter()
 
 	port := config.GetEnv("PORT")

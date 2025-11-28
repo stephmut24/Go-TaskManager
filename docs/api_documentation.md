@@ -81,6 +81,53 @@ The following endpoints are available:
     -d '{"id": "4", "title": "New Task", "description": "A new task", "duedate": "2025-12-01T15:00:00Z", "status": "Pending"}'
     ```
 
+### Register (Create account)
+
+- **URL:** `/register`
+- **Method:** `POST`
+- **Description:** Create a new user account. The first user created in an empty database is automatically promoted to the `ADMIN` role.
+- **Headers:** `Content-Type: application/json`
+- **Body (raw JSON):**
+        ```json
+        {
+            "username": "alice",
+            "password": "securepassword",
+            "user_type": "USER" // optional, first user will become ADMIN automatically
+        }
+        ```
+
+### Login (Authenticate & get JWT)
+
+- **URL:** `/login`
+- **Method:** `POST`
+- **Description:** Authenticate a user and receive a JWT token to access protected endpoints.
+- **Headers:** `Content-Type: application/json`
+- **Body (raw JSON):**
+        ```json
+        {
+            "username": "alice",
+            "password": "securepassword"
+        }
+        ```
+
+### Using the JWT token
+
+After a successful login you'll receive a `token` in the JSON response. Send it with requests to protected endpoints using the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+Only authenticated users with valid tokens can access protected routes. The role of the user (`USER` or `ADMIN`) is encoded in the token claims and enforced by the server.
+
+### Promote user to Admin
+
+- **URL:** `/users/:id/promote`
+- **Method:** `POST`
+- **Description:** Promote the user (by id) to `ADMIN`. Only existing admins can call this endpoint.
+- **Headers:** `Authorization: Bearer <token>` (must be ADMIN)
+
+
 ### Update a Task
 
 -   **URL:** `/tasks/:id`

@@ -15,7 +15,7 @@ import (
 var taskCollection *mongo.Collection
 
 func InitTaskCollection() {
-	taskCollection  = config.GetCollection("task_manager_db", "tasks")
+	taskCollection = config.GetCollection("task_manager_db", "tasks")
 }
 
 func GetAllTasks() ([]models.Task, error) {
@@ -35,9 +35,9 @@ func GetAllTasks() ([]models.Task, error) {
 			continue
 		}
 		tasks = append(tasks, t)
-		
+
 	}
-	
+
 	return tasks, nil
 }
 
@@ -56,8 +56,6 @@ func GetTaskByID(id string) (*models.Task, error) {
 	}
 	return &task, nil
 }
-
-
 
 func AddTask(newTask models.Task) (*models.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -100,7 +98,6 @@ func UpdateTask(id string, updatedTask models.Task) error {
 	return err
 }
 
-
 func DeleteTask(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -113,7 +110,3 @@ func DeleteTask(id string) error {
 	_, err = taskCollection.DeleteOne(ctx, bson.M{"_id": objID})
 	return err
 }
-
-
-
-
