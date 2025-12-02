@@ -1,15 +1,14 @@
-package data
+package repositories
 
 import (
 	"context"
 	"task_manager/config"
-	"task_manager/models"
+	"task_manager/domain"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	//"errors"
 )
 
 var taskCollection *mongo.Collection
@@ -18,7 +17,7 @@ func InitTaskCollection() {
 	taskCollection = config.GetCollection("task_manager_db", "tasks")
 }
 
-func GetAllTasks() ([]models.Task, error) {
+func GetAllTasks() ([]domain.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -28,85 +27,77 @@ func GetAllTasks() ([]models.Task, error) {
 	}
 	defer cursor.Close(ctx)
 
-	var tasks []models.Task
+	var tasks []domain.Task
 	for cursor.Next(ctx) {
-		var t models.Task
+		var t domain.Task
 		if err := cursor.Decode(&t); err != nil {
 			continue
 		}
 		tasks = append(tasks, t)
-
 	}
-
 	return tasks, nil
 }
 
-func GetTaskByID(id string) (*models.Task, error) {
+func GetTaskByID(id string) (*domain.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	objID, err := primitive.ObjectIDFromHex(id)
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	var task models.Task
-	err = taskCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&task)
-	if err != nil {
+	var t domain.Task
+	if err := taskCollection.FindOne(ctx, bson.M{"_id": oid}).Decode(&t); err != nil {
 		return nil, err
 	}
-	return &task, nil
+	return &t, nil
 }
 
-func AddTask(newTask models.Task) (*models.Task, error) {
+func AddTask(t domain.Task) (*domain.Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	newTask.ID = primitive.NewObjectID()
-	_, err := taskCollection.InsertOne(ctx, newTask)
+	if t.ID.IsZero() {
+		t.ID = primitive.NewObjectID()
+	}
+	_, err := taskCollection.InsertOne(ctx, t)
 	if err != nil {
 		return nil, err
 	}
-	return &newTask, nil
-
+	return &t, nil
 }
 
-func UpdateTask(id string, updatedTask models.Task) error {
+func UpdateTask(id string, updated domain.Task) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	objID, err := primitive.ObjectIDFromHex(id)
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
 	update := bson.M{}
+	if updated.Title != "" {
+		update["title"] = updated.Title
+	}
+	if updated.Description != "" {
+		update["description"] = updated.Description
+	}
+	if !updated.DueDate.IsZero() {
+		update["due_date"] = updated.DueDate
+	}
+	if updated.Status != "" {
+		update["status"] = updated.Status
+	}
 
-	if updatedTask.Title != "" {
-		update["title"] = updatedTask.Title
-	}
-	if updatedTask.Description != "" {
-		update["description"] = updatedTask.Description
-	}
-	if !updatedTask.DueDate.IsZero() {
-		update["due_date"] = updatedTask.DueDate
-	}
-	if updatedTask.Status != "" {
-		update["status"] = updatedTask.Status
-	}
-
-	_, err = taskCollection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
+	_, err = taskCollection.UpdateOne(ctx, bson.M{"_id": oid}, bson.M{"$set": update})
 	return err
 }
 
 func DeleteTask(id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	objID, err := primitive.ObjectIDFromHex(id)
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
-
-	_, err = taskCollection.DeleteOne(ctx, bson.M{"_id": objID})
+	_, err = taskCollection.DeleteOne(ctx, bson.M{"_id": oid})
 	return err
 }
